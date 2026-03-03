@@ -7,7 +7,6 @@ from django.views import generic
 from blog.models import Post, Commentary
 
 
-@login_required
 def index(request):
     """View function for the home page of the site."""
 
@@ -25,7 +24,7 @@ def index(request):
     return render(request, "blog/index.html", context=context)
 
 
-class PostDetailView(LoginRequiredMixin, generic.DetailView):
+class PostDetailView(generic.DetailView):
     model = Post
 
     def post(self, request, *args, **kwargs):
@@ -33,7 +32,7 @@ class PostDetailView(LoginRequiredMixin, generic.DetailView):
         new_comment = Commentary(
             user=request.user,
             post=self.object,
-            content=request.POST.get("comment", "default"),
+            content=request.POST.get("comment", ""),
         )
         new_comment.save()
         return redirect("blog:post-detail", pk=self.object.pk)
