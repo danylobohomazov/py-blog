@@ -1,9 +1,8 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.views import generic
 
+from blog.forms import CommentaryForm
 from blog.models import Post, Commentary
 
 
@@ -29,10 +28,16 @@ class PostDetailView(generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        new_comment = Commentary(
-            user=request.user,
-            post=self.object,
-            content=request.POST.get("comment", ""),
-        )
-        new_comment.save()
+        if request.user.is_authenticated():
+            new_comment = Commentary(
+                user=request.user,
+                post=self.object,
+                content=request.POST.get("comment", ""),
+            )
+            new_comment.save()
         return redirect("blog:post-detail", pk=self.object.pk)
+
+    def get_context_data(self, **kwargs):
+        context = super(PostDetailView, self).get_context_data(**kwargs)
+        context["commentary_form"] = CommentaryForm()
+        return context
