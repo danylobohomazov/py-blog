@@ -1,0 +1,39 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.shortcuts import render, redirect
+from django.views import generic
+
+from blog.models import Post, Commentary
+
+
+@login_required
+def index(request):
+    """View function for the home page of the site."""
+
+    num_posts = Post.objects.order_by("-created_time")
+    paginator = Paginator(num_posts, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    num_visits = request.session.get("num_visits", 0)
+    request.session["num_visits"] = num_visits + 1
+
+    context = {
+        "page_obj": page_obj,
+    }
+
+    return render(request, "blog/index.html", context=context)
+
+
+class PostDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Post
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        new_comment = Commentary(
+            user=request.user,
+            post=self.object,
+            content=request.POST.get("comment", "default"),
+        )
+        new_comment.save()
+        return redirect("blog:post-detail", pk=self.object.pk)

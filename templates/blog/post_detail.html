@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>{{ post.title }}</h1>
+  <p>Author: {{ post.owner.username }}</p>
+  <p>Created time: {{ post.created_time }}</p>
+  <p>Content: {{ post.content }}</p>
+  <p>Comments:</p>
+  {% for comment in post.commentaries.all %}
+    <hr>
+    <p>{{ comment.content }}</p>
+    <p><strong>{{ comment.user.username }}</strong></p>
+    <p><i>{{ comment.created_time }}</i></p>
+  {% endfor %}
+  <form action="" method="post">
+    {% csrf_token %}
+    <label for="1">Comment Field</label>
+    <br>
+    <textarea name="comment" id="1" cols="100" rows="10"></textarea>
+    <br>
+    <input type="submit" value="Add comment">
+  </form>
+{% endblock %}
+{% block pagination %}
+{% endblock %}
